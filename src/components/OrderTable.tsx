@@ -1,10 +1,12 @@
 import { useOrders } from '@/context/OrderContext';
 import { StatusBadge } from '@/components/StatusBadge';
-import type { OrderStatus } from '@/types/order.types';
-import { DateEditCell } from './DatePicker';
+import { EditCell } from '@/components/EditOrderField';
+import { CreateOrder } from '@/components/CreateOrder';
+import { MdDeleteForever } from "react-icons/md";
+
 
 export const OrderTable = () => {
-  const { orders, updateOrderStatus } = useOrders();
+  const { orders, deleteOrder } = useOrders();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -16,31 +18,34 @@ export const OrderTable = () => {
 
   return (
     <div className="overflow-x-auto">
+      <div className='flex justify-end'>
+        <CreateOrder/>
+      </div>
       <table className="min-w-full bg-white border border-gray-200 rounded-lg">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
               ID
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
               Cliente
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
               Producto
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
               Cantidad
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
               Precio Total
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
               Estado
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
               Fecha
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
               Acciones
             </th>
           </tr>
@@ -52,37 +57,55 @@ export const OrderTable = () => {
                 #{order.id}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {order.cliente}
+                <EditCell
+                  orderId={order.id}
+                  field='cliente'
+                  value={order.cliente}
+                >
+                  {order.cliente}
+                </EditCell>
               </td>
               <td className="px-6 py-4 text-sm text-gray-900">
                 {order.producto}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {order.cantidad}
+                <EditCell
+                  orderId={order.id}
+                  field='cantidad'
+                  value={order.cantidad}
+                >
+                  {order.cantidad}
+                </EditCell>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                 {formatCurrency(order.precio * order.cantidad)}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <StatusBadge status={order.estado} />
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <EditCell
+                  orderId={order.id}
+                  field='estado'
+                  value={order.estado}
+                >
+                  <StatusBadge status={order.estado} />
+                </EditCell>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <DateEditCell
+                <EditCell
                   orderId={order.id}
-                  fecha={order.fecha}
-                />
+                  field='fecha'
+                  value={order.fecha}
+                >
+                  {new Date(`${order.fecha}T00:00:00`).toLocaleDateString('en-US')}
+                </EditCell>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm">
-                <select
-                  value={order.estado}
-                  onChange={(e) => updateOrderStatus(order.id, e.target.value as OrderStatus)}
-                  className="text-gray-900 bg-white px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <button
+                  onClick={() => deleteOrder(order.id)}
+                  className="flex items-center gap-2 text-red-700 !bg-transparent"
                 >
-                  <option value="pendiente">Pendiente</option>
-                  <option value="en_proceso">En Proceso</option>
-                  <option value="completado">Completado</option>
-                  <option value="cancelado">Cancelado</option>
-                </select>
+                  <MdDeleteForever />
+                  Eliminar
+                </button>
               </td>
             </tr>
           ))}
